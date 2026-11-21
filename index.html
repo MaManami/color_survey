@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>配色の印象に関する調査</title>
+<style>
+  :root{
+    --ink:#1c1c1e; --sub:#6b6b73; --line:#dcdce2; --bg:#fbfbfc;
+    --accent:#3a5a8c; --accent-soft:#eef2f8; --warn:#8c3a3a;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  /* 貼りついた画像と見出しの下に隠れないよう、スクロール先に余白を取る */
+  html{scroll-padding-top:calc(var(--stim-h, 0px) + 72px)}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",
+                "Yu Gothic UI","Meiryo",sans-serif;
+    color:var(--ink); background:var(--bg); line-height:1.75;
+    font-size:16px; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:32px 20px 96px}
+  h1{font-size:22px;line-height:1.5;margin:0 0 20px}
+  h2{font-size:18px;line-height:1.5;margin:28px 0 10px}
+  p{margin:0 0 14px}
+  .lead{color:var(--sub);font-size:15px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:24px;margin:0 0 20px}
+  .note{background:var(--accent-soft);border-radius:10px;padding:16px 18px;margin:0 0 18px;font-size:15px}
+  .warn{background:#fdf3f3;border-left:3px solid var(--warn);padding:14px 16px;margin:0 0 18px;font-size:15px}
+  ol,ul{margin:0 0 14px;padding-left:1.4em}
+  li{margin:0 0 8px}
+  button{
+    font:inherit;font-weight:600;color:#fff;background:var(--accent);
+    border:0;border-radius:10px;padding:13px 30px;cursor:pointer;
+  }
+  button:hover{filter:brightness(1.08)}
+  button:disabled{background:#c3c7cf;cursor:not-allowed}
+  button.ghost{background:#fff;color:var(--sub);border:1px solid var(--line)}
+  .actions{display:flex;gap:12px;align-items:center;margin-top:24px;flex-wrap:wrap}
+  .hint{color:var(--sub);font-size:14px}
+  .err{color:var(--warn);font-size:14px;font-weight:600}
+
+  /* 設問 */
+  .q{margin:0 0 26px}
+  .q .label{font-weight:600;margin:0 0 10px;display:block}
+  .opts{display:flex;flex-wrap:wrap;gap:8px}
+  .opts label{
+    display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);
+    background:#fff;border-radius:999px;padding:9px 16px;cursor:pointer;font-size:15px;
+  }
+  .opts label:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+  .opts input{accent-color:var(--accent);margin:0}
+
+  /* 刺激と評定 */
+  .stim{
+    position:sticky;top:0;z-index:5;background:var(--bg);
+    padding:10px 0 12px;border-bottom:1px solid var(--line);margin-bottom:18px;
+  }
+  .stim img{display:block;width:100%;max-width:520px;margin:0 auto;border-radius:8px}
+  .counter{text-align:center;color:var(--sub);font-size:13px;margin:0 0 8px}
+  .bar{height:4px;background:var(--line);border-radius:2px;overflow:hidden;margin:0 0 10px}
+  .bar > i{display:block;height:100%;background:var(--accent);transition:width .25s}
+
+  table.grid{width:100%;border-collapse:collapse;font-size:15px}
+  table.grid thead th{
+    position:sticky; top:var(--stim-h, 0px); z-index:4;
+    background:#fff; box-shadow:0 1px 0 var(--line);
+  }
+  table.grid th{font-weight:600;color:var(--sub);font-size:12px;padding:10px 2px 8px;text-align:center;line-height:1.35}
+  table.grid th.rowhead{text-align:left;width:26%}
+  /* 対になった項目は「暖かい ○○○○○ 涼しい」の形にする */
+  table.grid td.poleleft{text-align:right;padding-right:14px;white-space:nowrap}
+  table.grid td.poleright{text-align:left;padding-left:14px;white-space:nowrap;
+                          font-weight:500;width:14%}
+  table.grid tr.attn td.rowhead{font-weight:600}
+  table.grid th .num{font-size:15px;color:var(--ink);font-weight:700}
+  /* 貼りついた見出しの下に行が隠れないよう、スクロール位置に余白を取る */
+  table.grid tbody tr{scroll-margin-top:calc(var(--stim-h, 0px) + 72px)}
+  table.grid td{text-align:center;padding:7px 2px;border-top:1px solid #eef0f3}
+  table.grid td.rowhead{text-align:left;font-weight:500}
+  table.grid tr:hover td{background:#fafbfd}
+  table.grid input{width:20px;height:20px;accent-color:var(--accent);margin:0;cursor:pointer}
+  tr.missing td{background:#fdf3f3 !important}
+  .seg{padding-top:18px}
+  .seg td{border-top:2px solid var(--line)}
+  .polelabel{font-size:12px;color:var(--sub)}
+
+  /* グレースケール課題 */
+  .patches{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;
+           background:#777777;padding:26px;border-radius:10px;margin:0 0 18px}
+  .patch{width:92px;height:92px;border-radius:6px;display:flex;
+         align-items:center;justify-content:center;font-size:30px;font-weight:700}
+  .codebox{font-size:30px;font-weight:700;letter-spacing:.12em;text-align:center;
+           background:var(--accent-soft);border-radius:10px;padding:22px;margin:16px 0}
+  textarea{width:100%;height:150px;font-family:ui-monospace,monospace;font-size:12px;
+           border:1px solid var(--line);border-radius:8px;padding:10px}
+  .hidden{display:none !important}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script src="data.js"></script>
+<script>
+/* ===================================================================
+   設定 ── ここだけ書き換えれば動きます
+   =================================================================== */
+const ENDPOINT = "PASTE_YOUR_GAS_EXEC_URL_HERE";  // /exec で終わるURL
+const TOKEN    = "CHANGE_ME";                      // GAS側と同じ合言葉
+const SCALE    = [1,2,3,4,5];   // 画面の数字と保存する値を一致させる
+const SCALE_LABELS = ["まったく<br>当てはまらない","あまり<br>当てはまらない",
+                      "どちらとも<br>いえない","やや<br>当てはまる","とてもよく<br>当てはまる"];
+
+/* ===================================================================
+   状態
+   =================================================================== */
+// URLの末尾に #rehearsal を付けると、最後に所要時間のまとめが出ます（参加者には出ません）
+const REHEARSAL = location.hash === "#rehearsal";
+
+const S = {
+  pid: null, block: null, assignedBy: null,
+  startedAt: null, wordOrder: null,
+  gray: {}, env: {}, attr: {}, cond: {},
+  responses: [], attention: null,
+  lastScreen: "boot",
+};
+const app = document.getElementById("app");
+
+function uid(n){
+  const c = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // 紛らわしい文字を除く
+  let s = ""; const a = new Uint8Array(n); crypto.getRandomValues(a);
+  for (const v of a) s += c[v % c.length];
+  return s;
+}
+function shuffled(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = crypto.getRandomValues(new Uint32Array(1))[0] % (i + 1);
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function show(html, screenName){
+  S.lastScreen = screenName || S.lastScreen;
+  app.innerHTML = (REHEARSAL
+    ? `<div class="note" style="background:#fffbea;margin-bottom:18px">
+         <b>リハーサル中です。</b>最後に所要時間のまとめが出ます。参加者にはこの表示は出ません。
+       </div>` : "") + html;
+  window.scrollTo(0, 0);
+}
+
+function fmt(ms){
+  const s = Math.round(ms / 1000);
+  return `${Math.floor(s / 60)}分${String(s % 60).padStart(2, "0")}秒`;
+}
+
+function rehearsalPanel(){
+  if (!REHEARSAL) return "";
+  const ms = S.responses.map(r => r.ms).sort((a, b) => a - b);
+  const sum = ms.reduce((a, b) => a + b, 0);
+  const med = ms[Math.floor(ms.length / 2)];
+  const wall = new Date() - new Date(S.startedAt);
+  const grayOk = S.gray.correct ? S.gray.correct.filter(Boolean).length : 0;
+
+  return `<div class="card" style="border-color:#b08900">
+    <h2 style="margin-top:0">リハーサルのまとめ</h2>
+    <table class="grid" style="font-size:15px">
+      <tbody>
+        <tr><td class="rowhead">入口から完了までの実時間</td><td style="text-align:right"><b>${fmt(wall)}</b></td></tr>
+        <tr><td class="rowhead">評定21枚の合計（説明・属性を除く）</td><td style="text-align:right">${fmt(sum)}</td></tr>
+        <tr><td class="rowhead">1枚あたり　中央値</td><td style="text-align:right">${(med/1000).toFixed(1)} 秒</td></tr>
+        <tr><td class="rowhead">　　　　　　最短 / 最長</td><td style="text-align:right">${(ms[0]/1000).toFixed(1)} / ${(ms[ms.length-1]/1000).toFixed(1)} 秒</td></tr>
+        <tr><td class="rowhead">グレースケール課題</td><td style="text-align:right">6問中 ${grayOk} 問</td></tr>
+        <tr><td class="rowhead">注意チェック</td><td style="text-align:right">${S.attention && S.attention.pass ? "通過" : "不通過"}</td></tr>
+        <tr><td class="rowhead">割り当てられた版</td><td style="text-align:right">版 ${S.block}（${S.assignedBy === "server" ? "サーバ" : "手元"}）</td></tr>
+      </tbody>
+    </table>
+    <div class="note" style="margin-top:18px">
+      <b>除外基準の目安（確認リスト B-10「実測値の50%未満」）</b><br>
+      実測 <b>${fmt(wall)}</b> の50% ＝ <b>${fmt(wall / 2)}</b>。これを下回る回答を除外の候補とする、という線になります。<br>
+      <span class="hint">ただし、作った本人は設問を熟知しているぶん最速値が出ます。
+      <b>募集文に書く所要時間は、この実測の1.5〜2倍</b>（${fmt(wall*1.5)}〜${fmt(wall*2)}）を目安にしてください。</span>
+    </div>
+  </div>`;
+}
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+/* 設問を組み立てる小道具 */
+function radioGroup(name, options){
+  return `<div class="opts">` + options.map((o,i) =>
+    `<label><input type="radio" name="${name}" value="${esc(o)}"><span>${esc(o)}</span></label>`
+  ).join("") + `</div>`;
+}
+function question(name, label, options){
+  return `<div class="q" data-q="${name}"><span class="label">${label}</span>${radioGroup(name, options)}</div>`;
+}
+function collect(names){
+  const out = {}; const missing = [];
+  for (const n of names){
+    const el = document.querySelector(`input[name="${n}"]:checked`);
+    if (el) out[n] = el.value; else missing.push(n);
+  }
+  return { out, missing };
+}
+function flagMissing(missing){
+  document.querySelectorAll("[data-q]").forEach(d => d.style.background = "");
+  missing.forEach(n => {
+    const d = document.querySelector(`[data-q="${n}"]`);
+    if (d){ d.style.background = "#fdf3f3"; }
+  });
+  if (missing.length){
+    const first = document.querySelector(`[data-q="${missing[0]}"]`);
+    if (first) first.scrollIntoView({behavior:"smooth", block:"center"});
+  }
+}
+
+/* ===================================================================
+   0. 入口 ── 端末の判定と教示
+   =================================================================== */
+function screenIntro(){
+  const w = window.innerWidth;
+  const coarse = window.matchMedia("(pointer: coarse)").matches;
+  const tooNarrow = w < 820;
+
+  if (tooNarrow){
+    show(`<div class="card">
+      <h1>この調査はパソコンまたはタブレットからご回答ください</h1>
+      <p>この調査は色の見え方を扱うため、画面の広い端末でのご回答をお願いしております。
+         いまお使いの端末では、設問が正しく表示されません。</p>
+      <p class="lead">お手数ですが、パソコンまたはタブレットで同じURLを開いてください。
+         タブレットをお使いで横向きにできる場合は、横向きにしてから再読み込みしてください。</p>
+      <div class="actions"><button onclick="location.reload()">再読み込み</button></div>
+    </div>`, "blocked_device");
+    return;
+  }
+
+  show(`<div class="card">
+    <h1>配色の印象に関する調査</h1>
+    <p class="lead">ご協力ありがとうございます。はじめに、ご回答の前のお願いが3点あります。</p>
+
+    <div class="warn">
+      <b>この調査は色の見え方を扱います。次の設定をご確認ください。</b>
+      <ol style="margin-top:10px;margin-bottom:0">
+        <li><b>パソコンまたはタブレットからご回答ください。</b>スマートフォンでは正しく表示されません</li>
+        <li><b>画面の「夜間モード」「ブルーライトカット」「Night Shift」をオフにしてください。</b>
+            これらがオンになっていると、画面の色味が変わってしまいます
+          <ul style="margin-top:6px">
+            <li>Windows：設定 → システム → ディスプレイ → 夜間モード をオフ</li>
+            <li>Mac：システム設定 → ディスプレイ → Night Shift をオフ</li>
+            <li>ブルーライトカットのアプリやメガネをお使いの場合は外してください</li>
+          </ul>
+        </li>
+        <li><b>画面の明るさをいつもより明るめにし、直射日光の当たらない場所でご回答ください</b></li>
+      </ol>
+    </div>
+
+    <p class="lead">設定が変更できない場合も、そのままご回答いただいて構いません。
+       後ほど画面の環境についてお尋ねします。</p>
+
+    <div class="actions">
+      <button id="go">設定を確認しました。次へ</button>
+      <span class="hint">所要時間は15〜20分です</span>
+    </div>
+  </div>`, "intro");
+
+  document.getElementById("go").onclick = screenConsent;
+}
+
+/* ===================================================================
+   1. 説明書と同意
+   =================================================================== */
+function screenConsent(){
+  show(`<div class="card">
+    <h1>研究についての説明書</h1>
+    <p class="lead">研究責任者：　牛尼　剛聡（九州大学大学院芸術工学研究院・教授）<br>
+       説　明　者：　松本　真美（九州大学芸術工学部・学部生）</p>
+
+    <h2>Ⅰ．研究課題</h2>
+    <p>大規模言語モデルによるカラーパレット生成と人間の色彩感性との一致度に関する研究</p>
+
+    <h2>Ⅱ．研究目的</h2>
+    <p>この研究は、「AI（大規模言語モデル）が選んだ色の組み合わせが、人が見たときに意図したとおりの印象を与えるか」を調べるものです。</p>
+    <p>近年、AIに「優雅な雰囲気の色を考えて」と頼むことができるようになりました。しかし、AIが選んだ色を人が実際に「優雅だ」と感じるかどうかは、まだよくわかっていません。</p>
+    <p>そこで、いろいろな方法で作った色の組み合わせをご覧いただき、それぞれがどんな印象に感じられるかをお答えいただくことにいたしました。皆さまのお答えを集めることで、AIが選んだ色が人の感じ方とどのくらい合っているのかを明らかにします。</p>
+    <p>この結果は、将来的にWebサイトの配色を自動で設計する仕組みを考えるための基礎資料となります。</p>
+
+    <h2>Ⅲ．研究方法</h2>
+    <p>この調査は、日本国内にお住まいで、日本語を母語とする18歳以上の方を対象としています。すべてWeb上で行いますので、どこかへお越しいただく必要はありません。おからだに触れる検査や測定は一切行いません。</p>
+
+    <p><b>【ご回答いただく内容】</b></p>
+    <p>画面に、３つの色を横に並べた画像が１枚ずつ表示されます。それぞれについて、次の１９の質問にお答えください。</p>
+    <ul>
+      <li>「あどけない」「優雅な」などの１６の言葉について、その配色にどのくらい当てはまると感じるかを、５段階でお選びください</li>
+      <li>「暖かい―涼しい」「柔らかい―硬い」「澄んだ―濁った」の３つについて、どちら寄りに感じるかを５段階でお選びください</li>
+    </ul>
+    <p>これを２１枚分繰り返します。正解・不正解はありません。皆さまの能力やセンスを評価するものではなく、「そう感じる人がどのくらいいるか」を知るための調査です。直感でお答えください。</p>
+    <p>なお、回答を丁寧に読んでいただけているかを確かめるため、「この項目では３を選んでください」という設問を１行混ぜています。また、同じ画像が２回出てくることがあります。いずれも回答の安定性を確かめるためのものです。</p>
+
+    <p><b>【所要時間】</b></p>
+    <p>合計で１５～２０分程度です。途中で休憩しても、やめても構いません。</p>
+
+    <p><b>【ご回答前にお尋ねすること】</b></p>
+    <p>年代、性別、母語、主に育った国・地域、日本語での生活年数、色の見分けにくさを感じることがあるか、ご使用の端末、画面の設定、お部屋の明るさをお尋ねします。いずれも選択式で、「答えたくない」をお選びいただけます。</p>
+    <p>色の見分けにくさについては、診断の有無をお聞きするものではありません。また、このご回答によってご参加をお断りしたり、ご回答を除外したりすることはありません。</p>
+
+    <p><b>【画面の設定についてのお願い】</b></p>
+    <p>色の見え方を扱う調査のため、次の３点をお願いしております。</p>
+    <p>（１）パソコンまたはタブレットからご回答ください<br>
+       （２）「夜間モード」「ブルーライトカット」「Night Shift」をオフにしてください<br>
+       （３）画面の明るさをいつもより明るめにし、直射日光の当たらない場所でご回答ください</p>
+    <p>設定を変更できない場合も、そのままご回答いただいて構いません。後ほど画面環境についてお尋ねします。</p>
+    <p>また、お使いの画面での色の見え方を知るため、灰色の濃淡の中に小さく数字が書かれた画像を６枚お見せし、読めた数字を入力していただきます。読めない場合は「読めない」をお選びください。この結果によってご参加をお断りすることはありません。</p>
+
+    <p><b>【調査の流れ】</b></p>
+    <p>1．この説明をお読みいただき、ご同意いただける場合のみ先へ進む（約2分）<br>
+       2．ご年齢・母語・お住まいの国についてのご確認（３問）<br>
+       3．画面の設定のお願いと、灰色の読み取り（約2分）<br>
+       4．属性についてのご質問（約1分）<br>
+       5．練習１枚（約1分）<br>
+       6．本番２１枚（約9～13分）<br>
+       7．完了コードの表示と、ご提出（約1分）</p>
+    <p>２で、ご年齢が18歳未満の場合や、日本語が母語ではない場合、日本国外にお住まいの場合は、そこで終了画面に進みます。この場合は調査の対象外となるため、謝礼はお支払いできません。ご了承ください。</p>
+
+    <h2>Ⅳ．研究の危険性、不利益、苦痛、副作用等、及びそれらの対策について</h2>
+    <p>この調査でお見せするのは色の面だけの画像で、文字・人物・企業のマークなどは含まれません。画面が点滅したり、急に明るくなったりすることもありません。ご質問は配色の印象についてのみで、ご病気、ご家族、ご職業、お考えや信条などについては一切お尋ねしません。そのため、心身への影響はほとんどないと考えています。</p>
+    <p>ご負担となるのは、１５～２０分というお時間です。また、画面を長く見続けることで目が疲れることがあります。いつでも中断して休憩していただけますし、おやめになっても構いません。</p>
+    <p>なお、調査を公平に行うため、それぞれの配色がどのような方法で作られたものかは、調査中はお知らせしておりません。これは、先にお伝えするとご回答が影響を受けてしまうためです。ご関心がある場合は、調査終了後にⅨの連絡先までお問い合わせください。お答えします。</p>
+
+    <h2>Ⅴ．緊急事態に対する対応について</h2>
+    <p>この調査は、おからだに影響を及ぼすものではありません。</p>
+    <p>もしご回答中に目の疲れや体調の変化を感じられた場合は、すぐに中断して休憩してください。そのままおやめになっても構いません。</p>
+    <p>調査のあとで何か気になることがあれば、Ⅸに記載の連絡先までお知らせください。適切に対応いたします。</p>
+
+    <h2>Ⅵ．同意しない場合の不利益について</h2>
+    <p>この研究への参加は、あなたの自由な意思で決めてください。同意されなくても、あなたの不利益になることは全くありません。</p>
+    <p>また、一旦同意した場合でも、あなたが不利益を受けることなく、いつでも参加を取りやめることができます。ご回答を送信される前であれば、画面を閉じていただくことで、いつでも取りやめていただけます。</p>
+    <p>なお、この調査はお名前をいただかない形式で行います。そのため、ご回答を送信されたあとは、どのご回答がどなたのものかを研究者が知ることができません。そのため、送信後の個別の削除のご依頼にはお応じできません。また、公開したデータ（Ⅶ参照）からも、個別のご回答を取り除くことはできません。ご了承ください。</p>
+
+    <h2>Ⅶ．プライバシーについて</h2>
+    <p>個人情報及び研究により得られたデータは、研究以外の目的には一切使用いたしません。また、情報管理には十分配慮しますので、下記の公開用に加工したデータを除き、研究関係者以外の者に渡ることはありません。</p>
+    <p>この調査では、お名前、ご住所、お電話番号、メールアドレス、生年月日など、どなたであるかを特定できる情報は一切いただきません。</p>
+    <p>謝礼のお支払いは、調査の最後に表示されるコードをクラウドソーシングサービス上でご提出いただくことで行います。研究者が確認するのはコードが提出されたかどうかだけで、サービス上のご登録情報やお振込先を知ることはありません。ご回答内容とサービス上のご登録を照らし合わせることもありません。</p>
+    <p>ご回答は数値のデータとしてまとめて集計し、学術的な発表に用います。また、研究の検証と今後の研究に役立てるため、どなたのご回答か特定できないよう回答日時などを除き、属性を大まかな区分にまとめたうえで、研究用データセットとしてインターネット上に公開します。公開したデータは、ほかの研究者等も利用できるようになります。データは九州大学の研究データ管理用ストレージに保存し、研究成果の発表後10年間保管したあと、復元できない方法で消去します（公開したデータセットは公開先で引き続き公開されます）。</p>
+
+    <h2>Ⅷ．謝礼について</h2>
+    <p>ご協力いただいた方には謝礼をお支払いいたします。謝礼の金額は400円で、クラウドソーシングサービスを通じてお支払いします。ただし、参加条件（18歳以上、日本語が母語、日本国内在住）に該当しない方は、最初の確認の段階で終了となり、謝礼の対象外となります。</p>
+    <p>回答の安定性を確かめる設問の結果によって、謝礼をお支払いしないことはありません。</p>
+
+    <h2>Ⅸ．その他</h2>
+    <p>今回の研究について、苦情、その他ご意見がありましたら、九州大学大学院芸術工学研究院「研究倫理審査委員会」までご連絡ください。</p>
+    <p>連絡先：福岡市南区塩原4-9-1 九州大学芸術工学部総務課研究支援係<br>
+       電話番号　０９２-５５３-４４２９</p>
+    <p>研究責任者連絡先：福岡市南区塩原4-9-1 九州大学大学院芸術工学研究院<br>
+       教授 牛尼　剛聡<br>
+       電話番号　０９２-５５３-４４６９</p>
+  </div>
+
+  <div class="card">
+    <h1>同意の確認</h1>
+    <p>上記の「研究についての説明書」を読み、次の事項について説明を受け、内容を理解しました。</p>
+    <ol>
+      <li>研究の目的について</li>
+      <li>研究の方法について</li>
+      <li>研究の危険性、不利益、苦痛等、及びそれらの対策</li>
+      <li>緊急事態に対する対応</li>
+      <li>同意しない場合でも不利益は受けないこと</li>
+      <li>同意した後でもいつでも途中でやめることができ、不利益は受けないこと</li>
+      <li>プライバシーは守られること</li>
+      <li>謝礼について</li>
+    </ol>
+    <p>とくに、以下の点を承知したうえで、本研究に参加することに同意します。</p>
+    <div class="note">
+      ・参加は任意であり、途中でいつでもやめられること<br>
+      ・回答は無記名で、個人を特定する情報は取得されないこと<br>
+      ・個人を識別できないよう加工した回答データが、研究用データセットとして公開されること<br>
+      ・送信後は、回答や公開データから個別に取り除くことができないこと<br>
+      ・参加条件（18歳以上、日本語が母語、日本国内在住）に該当しない場合は、謝礼の対象外となること
+    </div>
+
+    ${question("consent", "",
+               ["同意します", "同意しません（回答を記録せずに終了します）"])}
+
+    <div class="actions">
+      <button id="go">次へ</button>
+    </div>
+  </div>`, "consent");
+
+  document.getElementById("go").onclick = () => {
+    const { out, missing } = collect(["consent"]);
+    if (missing.length){ flagMissing(missing); return; }
+    if (out.consent !== "同意します"){ screenDecline(); return; }
+    screenEligibility();
+  };
+}
+
+function screenDecline(){
+  show(`<div class="card">
+    <h1>ご確認ありがとうございました</h1>
+    <p>この調査はここで終了です。ご回答は記録されておりません。</p>
+    <p class="lead">お時間をいただき、ありがとうございました。</p>
+  </div>`, "declined");
+}
+
+/* ===================================================================
+   2. 参加条件（3問）
+   =================================================================== */
+function screenEligibility(){
+  show(`<div class="card">
+    <h1>ご参加の条件の確認</h1>
+    <p class="lead">この調査には参加の条件があります。3つだけお尋ねします。</p>
+
+    ${question("age",  "18歳以上ですか。", ["はい", "いいえ"])}
+    ${question("lang", "母語（いちばん自然に使える言語）は日本語ですか。", ["はい", "いいえ"])}
+    ${question("resi", "現在、日本国内にお住まいですか。", ["はい", "いいえ"])}
+
+    <div class="actions"><button id="go">次へ</button></div>
+  </div>`, "eligibility");
+
+  document.getElementById("go").onclick = () => {
+    const { out, missing } = collect(["age","lang","resi"]);
+    if (missing.length){ flagMissing(missing); return; }
+    S.cond = out;
+    if (out.age !== "はい" || out.lang !== "はい" || out.resi !== "はい"){
+      screenIneligible(); return;
+    }
+    screenAssign();
+  };
+}
+
+function screenIneligible(){
+  show(`<div class="card">
+    <h1>ご協力ありがとうございました</h1>
+    <p>恐れ入りますが、この調査は <b>18歳以上・日本語を母語とする・日本国内にお住まいの方</b>
+       を対象としております。条件に当てはまらないため、ここで終了となります。</p>
+    <p class="lead">ご回答は記録されておりません。お時間をいただき、ありがとうございました。</p>
+  </div>`, "ineligible");
+}
+
+/* ===================================================================
+   3. 版の割り当てと画像の先読み
+   =================================================================== */
+async function screenAssign(){
+  show(`<div class="card">
+    <h1>準備しています</h1>
+    <p class="lead">画像を読み込んでいます。10秒ほどお待ちください。</p>
+    <div class="bar"><i id="p" style="width:4%"></i></div>
+    <p class="hint" id="msg">接続中…</p>
+  </div>`, "loading");
+
+  S.pid = uid(8);
+  S.startedAt = new Date().toISOString();
+  S.wordOrder = shuffled(WORDS.map((_, i) => i));
+
+  // 版の割り当て：サーバの通し番号で均等に。届かなければ手元で無作為に選ぶ
+  try {
+    const r = await fetch(ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ action: "assign", token: TOKEN, pid: S.pid }),
+    });
+    const j = await r.json();
+    if (j && j.ok && j.block >= 1 && j.block <= 6){
+      S.block = j.block; S.assignedBy = "server";
+    } else { throw new Error("bad"); }
+  } catch (e) {
+    S.block = 1 + (crypto.getRandomValues(new Uint32Array(1))[0] % 6);
+    S.assignedBy = "client";
+  }
+
+  S.env = {
+    ua: navigator.userAgent,
+    innerW: window.innerWidth, innerH: window.innerHeight,
+    screenW: screen.width, screenH: screen.height,
+    dpr: window.devicePixelRatio,
+    darkMode: window.matchMedia("(prefers-color-scheme: dark)").matches,
+    lang: navigator.language,
+    tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  };
+
+  // 先読み（時間の計測が読み込み待ちで汚れないように）
+  const seq = BLOCKS[S.block];
+  const names = ["practice", ...seq.map(s => s.img)];
+  let done = 0;
+  await Promise.all(names.map(n => new Promise(res => {
+    const im = new Image();
+    im.onload = im.onerror = () => {
+      done++;
+      const pct = Math.round(4 + 96 * done / names.length);
+      const bar = document.getElementById("p");
+      const msg = document.getElementById("msg");
+      if (bar) bar.style.width = pct + "%";
+      if (msg) msg.textContent = `${done} / ${names.length} 枚`;
+      res();
+    };
+    im.src = IMG[n];
+  })));
+
+  screenGray();
+}
+
+/* ===================================================================
+   4. グレースケールの読み取り課題
+   =================================================================== */
+function screenGray(){
+  const digits = [];
+  const mk = (p) => {
+    const d = crypto.getRandomValues(new Uint32Array(1))[0] % 10;
+    digits.push(d);
+    return `<div class="patch" style="background:${p.bg};color:${p.fg}">${d}</div>`;
+  };
+  const dark  = GRAY.dark.map(mk).join("");
+  const light = GRAY.light.map(mk).join("");
+  S.gray.digits = digits;
+
+  show(`<div class="card">
+    <h1>画面の確認</h1>
+    <p>下の6つの四角には、それぞれ数字が1つずつ、うっすらと書かれています。
+       <b>左から順に、読み取れた数字を入力してください。</b></p>
+    <p class="lead">読み取れない場合は「読めない」をお選びください。
+       これは画面の設定を記録するためのもので、<b>正解・不正解はなく、回答の採否にも影響しません。</b></p>
+    <div class="note">
+      その前にもう一度だけ。<b>「夜間モード」「ブルーライトカット」「Night Shift」はオフになっていますか。</b>
+      オンのままだと画面の色味が変わってしまいます。変更できない場合も、そのままお進みいただいて構いません。
+    </div>
+
+    <div class="patches">${dark}${light}</div>
+
+    <div class="q" data-q="gray">
+      <span class="label">読み取れた数字を、左から順にお選びください</span>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        ${[0,1,2,3,4,5].map(i =>
+          `<select id="g${i}" style="width:110px;height:46px;font-size:16px;padding:0 8px;
+             border:1px solid var(--line);border-radius:8px;background:#fff">
+             <option value="">—</option>
+             ${[0,1,2,3,4,5,6,7,8,9].map(d => `<option value="${d}">${d}</option>`).join("")}
+             <option value="x">読めない</option>
+           </select>`
+        ).join("")}
+      </div>
+    </div>
+
+    <div class="actions">
+      <button id="go">次へ</button>
+      <span class="err hidden" id="e">6つすべてについて、数字か「読めない」をお選びください</span>
+    </div>
+  </div>`, "gray");
+
+  document.getElementById("go").onclick = () => {
+    const vals = [0,1,2,3,4,5].map(i => document.getElementById("g"+i).value);
+    if (vals.some(v => v === "")){
+      document.getElementById("e").classList.remove("hidden");
+      flagMissing(["gray"]);
+      return;
+    }
+    S.gray.answers = vals;                       // "0"〜"9" または "x"（読めない）
+    S.gray.unreadable = vals.map(v => v === "x");
+    S.gray.correct = vals.map((a, i) => a !== "x" && Number(a) === digits[i]);
+    screenEnv();
+  };
+}
+
+/* ===================================================================
+   5. 画面の環境と、あなたについて
+   =================================================================== */
+function screenEnv(){
+  show(`<div class="card">
+    <h1>画面の環境について</h1>
+    <p class="lead">ありのままをお答えください。設定を変更されていない場合も、
+       そのままお答えいただいて構いません。</p>
+
+    ${question("device", "いまお使いの端末はどれですか。",
+               ["デスクトップPC","ノートPC","タブレット","答えたくない"])}
+    ${question("night", "画面の「夜間モード」「ブルーライトカット」「Night Shift」は、いまどうなっていますか。",
+               ["オフにした","もともとオフだった","オンのまま","分からない","答えたくない"])}
+    ${question("room", "いまいらっしゃる部屋の明るさはどれに近いですか。",
+               ["明るい","ふつう","暗い","答えたくない"])}
+    ${question("sun", "画面に直射日光が当たっていますか。",
+               ["当たっている","当たっていない","答えたくない"])}
+
+    <h1 style="margin-top:36px">あなたについて</h1>
+    <p class="lead">統計的な分析にのみ使用します。個人が特定される形で公表することはありません。</p>
+
+    ${question("age_band", "年代を教えてください。",
+               ["10代","20代","30代","40代","50代","60代以上","答えたくない"])}
+    ${question("gender", "性別を教えてください。",
+               ["女性","男性","その他","答えたくない"])}
+    ${question("raised", "主に育った国・地域は日本ですか。", ["日本","日本以外","答えたくない"])}
+    ${question("years", "日本語で生活してきた年数はどれに近いですか。",
+               ["10年未満","10〜20年","20年以上","答えたくない"])}
+    ${question("cvd", "色の見分けにくさを感じることがありますか。",
+               ["はい","いいえ","答えたくない"])}
+
+    <div class="note">
+      色の見え方には個人差があります。<b>どのようにお答えいただいても問題はありません。</b>
+      この設問は記録のためのもので、回答の採否には用いません。
+    </div>
+
+    <div class="actions"><button id="go">次へ</button></div>
+  </div>`, "env");
+
+  document.getElementById("go").onclick = () => {
+    const names = ["device","night","room","sun","age_band","gender","raised","years","cvd"];
+    const { out, missing } = collect(names);
+    if (missing.length){ flagMissing(missing); return; }
+    S.env.report = { device: out.device, night: out.night, room: out.room, sun: out.sun };
+    S.attr = { age_band: out.age_band, gender: out.gender, raised: out.raised,
+               years: out.years, cvd: out.cvd,
+               lang_native: S.cond.lang, resident: S.cond.resi };
+    screenPracticeIntro();
+  };
+}
+
+/* ===================================================================
+   6. 評定の画面（練習・本番・注意チェックで共通）
+   =================================================================== */
+function ratingTable(attnWant){
+  const cells = (name) =>
+    SCALE.map(v => `<td><input type="radio" name="${name}" value="${v}"></td>`).join("");
+
+  const head = `<tr><th class="rowhead"></th>` +
+    SCALE.map((v,i) => `<th><span class="num">${v}</span><br>${SCALE_LABELS[i]}</th>`).join("") +
+    `<th></th></tr>`;
+
+  const wordRows = S.wordOrder.map(wi =>
+    `<tr data-row="w${wi}"><td class="rowhead">${esc(WORDS[wi])}</td>${cells("w" + wi)}<td></td></tr>`
+  ).join("");
+
+  // 注意チェック：独立した画面ではなく、16語の最後に1行まぎれこませる
+  const attnRow = (attnWant === null) ? "" :
+    `<tr data-row="attn" class="attn">
+       <td class="rowhead">この項目では「${attnWant}」を選んでください</td>
+       ${cells("attn")}<td></td></tr>`;
+
+  const pairRows = PAIRS.map((p, pi) =>
+    `<tr data-row="p${pi}" class="${pi===0?'seg':''}">
+       <td class="rowhead poleleft">${esc(p.left)}</td>${cells("p" + pi)}
+       <td class="poleright">${esc(p.right)}</td></tr>`
+  ).join("");
+
+  return `<table class="grid">
+    <thead>${head}</thead>
+    <tbody>${wordRows}${attnRow}
+      <tr class="seg"><td class="rowhead" colspan="7" style="padding-top:16px;color:var(--sub);font-size:13px">
+        次の3つは、<b>左と右のどちらに近いか</b>でお答えください</td></tr>
+      ${pairRows}
+    </tbody>
+  </table>`;
+}
+
+function ratingNames(attnWant){
+  return [...S.wordOrder.map(i => "w" + i),
+          ...(attnWant === null ? [] : ["attn"]),
+          ...PAIRS.map((_, i) => "p" + i)];
+}
+
+function screenPracticeIntro(){
+  show(`<div class="card">
+    <h1>回答のしかた</h1>
+    <p>これから、<b>3色の組み合わせ（配色）</b>を1枚ずつご覧いただきます。
+       それぞれの配色について、<b>16個の言葉がどの程度当てはまるか</b>をお答えください。</p>
+    <div class="note">
+      <b>正解・不正解はありません。</b>見た瞬間の印象で、深く考えずにお答えください。<br>
+      当てはまる言葉が1つもないように感じられることも、いくつも当てはまるように感じられることもあります。
+      どちらでも構いません。
+    </div>
+    <p>最後に、<b>「暖かい ⟷ 涼しい」</b>のように対になった3つの項目について、
+       左と右のどちらに近いかをお答えいただきます。</p>
+    <p class="lead">まず1枚、練習してみましょう。練習の回答は分析には使いません。</p>
+    <div class="actions"><button id="go">練習をはじめる</button></div>
+  </div>`, "practice_intro");
+  document.getElementById("go").onclick = () => screenRating({ practice: true });
+}
+
+function screenRating(opts){
+  const { practice = false, index = 0 } = opts;
+  const seq = BLOCKS[S.block];
+  const item = practice ? { img: "practice", rep: 0 } : seq[index];
+  const total = seq.length;
+  const shownAt = performance.now();
+
+  // 注意チェックは、中盤の1枚の評定表に1行だけまぎれこませる
+  // 説明書Ⅲに「『この項目では３を選んでください』という設問を１行混ぜています」と
+  // 明記しているため、指示する値は 3 で固定する（文面と一致させる）
+  const attnHere = !practice && ATTN_AFTER[S.block] === index;
+  const attnWant = attnHere ? 3 : null;
+
+  const counter = practice
+    ? `<div class="counter">練習</div>`
+    : `<div class="counter">${index + 1} / ${total} 枚</div>
+       <div class="bar"><i style="width:${Math.round(100*index/total)}%"></i></div>`;
+
+  show(`<div class="stim">
+      ${counter}
+      <img src="${IMG[item.img]}" alt="配色">
+    </div>
+    <div class="card">
+      <p style="margin-top:0"><b>この配色に、次の言葉はどの程度当てはまりますか。</b></p>
+      ${ratingTable(attnWant)}
+      <div class="actions">
+        <button id="go">${practice ? "練習を終えて本番へ" : (index + 1 === total ? "回答を送信する" : "次の配色へ")}</button>
+        <span class="err hidden" id="e">すべての項目にお答えください</span>
+      </div>
+    </div>`, practice ? "practice" : `rating_${index + 1}`);
+
+  // 見出し行が、配色の画像のすぐ下に貼りつくようにする
+  const syncStickyHeader = () => {
+    const stim = document.querySelector(".stim");
+    if (stim) document.documentElement.style.setProperty("--stim-h", stim.offsetHeight + "px");
+  };
+  syncStickyHeader();
+  const img = document.querySelector(".stim img");
+  if (img) { if (img.complete) syncStickyHeader(); else img.onload = syncStickyHeader; }
+  window.addEventListener("resize", syncStickyHeader);
+
+  document.querySelectorAll("table.grid input").forEach(el => {
+    el.addEventListener("change", () => {
+      const tr = el.closest("tr"); if (tr) tr.classList.remove("missing");
+    });
+  });
+
+  document.getElementById("go").onclick = () => {
+    const names = ratingNames(attnWant);
+    const { out, missing } = collect(names);
+    if (missing.length){
+      document.getElementById("e").classList.remove("hidden");
+      document.querySelectorAll("tr[data-row]").forEach(tr => tr.classList.remove("missing"));
+      missing.forEach(n => {
+        const tr = document.querySelector(`tr[data-row="${n}"]`);
+        if (tr) tr.classList.add("missing");
+      });
+      const first = document.querySelector(`tr[data-row="${missing[0]}"]`);
+      if (first) first.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+
+    if (!practice){
+      const values = {};
+      for (const n of names) if (n !== "attn") values[n] = Number(out[n]);
+      S.responses.push({
+        pos: index + 1, img: item.img, rep: item.rep,
+        values, ms: Math.round(performance.now() - shownAt),
+        has_attn: attnHere || undefined,
+      });
+      if (attnHere){
+        S.attention = {
+          pos: index + 1, asked: attnWant, answered: Number(out.attn),
+          pass: Number(out.attn) === attnWant,
+        };
+      }
+    }
+
+    if (practice){ screenRating({ index: 0 }); return; }
+    if (index + 1 === total){ submit(); return; }
+    screenRating({ index: index + 1 });
+  };
+}
+
+/* ===================================================================
+   8. 送信と完了コード
+   =================================================================== */
+function payload(){
+  return {
+    action: "submit", token: TOKEN,
+    pid: S.pid, block: S.block, assigned_by: S.assignedBy,
+    started_at: S.startedAt, finished_at: new Date().toISOString(),
+    word_order: S.wordOrder,
+    eligibility: S.cond, attributes: S.attr,
+    env: S.env, gray: S.gray,
+    attention: S.attention,
+    responses: S.responses,
+    total_ms: S.responses.reduce((a, r) => a + r.ms, 0),
+    scale: { points: SCALE, note: "画面に表示した数字と保存した値は同じ（1〜5）" },
+    version: "form-2026-11-21b",
+  };
+}
+
+async function submit(){
+  show(`<div class="card">
+    <h1>送信しています</h1>
+    <p class="lead">画面を閉じずに、少しだけお待ちください。</p>
+    <div class="bar"><i style="width:30%"></i></div>
+  </div>`, "submitting");
+
+  const body = JSON.stringify(payload());
+  let ok = false, lastErr = "";
+  for (let i = 0; i < 3 && !ok; i++){
+    try {
+      const r = await fetch(ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body,
+      });
+      const j = await r.json();
+      if (j && j.ok) ok = true; else lastErr = (j && j.error) || "unknown";
+    } catch (e) {
+      lastErr = String(e);
+      await new Promise(res => setTimeout(res, 1200 * (i + 1)));
+    }
+  }
+  ok ? screenDone() : screenDoneFailed(body, lastErr);
+}
+
+function screenDone(){
+  show(`<div class="card">
+    <h1>ご回答ありがとうございました</h1>
+    <p>すべて完了しました。<b>下の完了コードを、応募されたクラウドソーシングのページに貼り付けて提出してください。</b></p>
+    <div class="codebox">${esc(S.pid)}</div>
+    <p class="lead">コードの提出をもって、謝礼のお支払い手続きをいたします。
+       この画面を閉じる前に、必ずコードをコピーしてください。</p>
+    <div class="actions">
+      <button id="cp">コードをコピー</button>
+      <span class="hint" id="cpmsg"></span>
+    </div>
+  </div>` + rehearsalPanel(), "done");
+  document.getElementById("cp").onclick = async () => {
+    try { await navigator.clipboard.writeText(S.pid);
+          document.getElementById("cpmsg").textContent = "コピーしました"; }
+    catch (e) { document.getElementById("cpmsg").textContent = "コードを手で選択してコピーしてください"; }
+  };
+}
+
+function screenDoneFailed(body, err){
+  show(`<div class="card">
+    <h1>ご回答ありがとうございました</h1>
+    <div class="warn"><b>申し訳ありません。回答の送信に失敗しました。</b><br>
+      ご回答は無駄になりません。お手数ですが、下の2点をお願いいたします。</div>
+    <p><b>1. 完了コードを、クラウドソーシングのページに提出してください。</b>
+       送信の成否にかかわらず、謝礼はお支払いいたします。</p>
+    <div class="codebox">${esc(S.pid)}</div>
+    <p><b>2. 下の枠の中身をすべてコピーして、お問い合わせ先までお送りください。</b></p>
+    <textarea id="dump" readonly>${esc(body)}</textarea>
+    <div class="actions">
+      <button id="retry">もう一度送信してみる</button>
+      <button class="ghost" id="cp">枠の中身をコピー</button>
+      <span class="hint" id="m"></span>
+    </div>
+    <p class="hint" style="margin-top:16px">技術的な情報：${esc(err)}</p>
+  </div>` + rehearsalPanel(), "done_failed");
+
+  document.getElementById("retry").onclick = submit;
+  document.getElementById("cp").onclick = async () => {
+    try { await navigator.clipboard.writeText(body);
+          document.getElementById("m").textContent = "コピーしました"; }
+    catch (e) { document.getElementById("m").textContent = "枠の中を選択してコピーしてください"; }
+  };
+}
+
+/* ===================================================================
+   起動
+   =================================================================== */
+window.addEventListener("beforeunload", (e) => {
+  if (["intro","consent","declined","ineligible","done","done_failed"].includes(S.lastScreen)) return;
+  e.preventDefault(); e.returnValue = "";
+});
+
+screenIntro();
+</script>
+</body>
+</html>
